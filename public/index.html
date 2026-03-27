@@ -636,6 +636,102 @@
     .admin-log .log-line.warn { color: #5a4a1a; }
     .admin-log .log-line.err  { color: #5a1a1a; }
 
+    /* ─── AUTO-CLICKER STATUS BAR ─── */
+    #ac-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: transparent;
+      z-index: 190;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    #ac-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #22c55e, #86efac);
+      transition: width 0.08s linear;
+    }
+    body.chaos-mode #ac-bar-fill { background: linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6); }
+
+    /* Rage mode */
+    @keyframes rage-shake {
+      0%,100% { transform: translate(0,0) rotate(0deg); }
+      15%      { transform: translate(-3px, 2px) rotate(-0.5deg); }
+      30%      { transform: translate(3px, -2px) rotate(0.5deg); }
+      45%      { transform: translate(-2px, 3px) rotate(-0.3deg); }
+      60%      { transform: translate(2px, -1px) rotate(0.3deg); }
+      75%      { transform: translate(-1px, 2px) rotate(-0.2deg); }
+    }
+    body.rage-mode { animation: rage-shake 0.18s infinite; }
+    body.rage-mode::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(180,0,0,0.06);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Ghost mode */
+    body.ghost-mode .faceplate {
+      opacity: 0.22;
+      filter: blur(0.5px);
+      transition: opacity 0.4s, filter 0.4s;
+    }
+    body.ghost-mode .faceplate:hover { opacity: 0.9; filter: none; }
+
+    /* Matrix mode */
+    #matrix-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    body.matrix-mode #matrix-canvas { opacity: 0.35; }
+
+    /* Teleport animation */
+    @keyframes teleport-in {
+      from { opacity: 0; transform: scale(0.7) rotate(-8deg); }
+      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
+    .wall-bg.teleporting { animation: teleport-in 0.25s ease-out; }
+
+    /* Speed select */
+    .speed-select {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      outline: none;
+    }
+    .speed-select:focus { border-color: #444; color: #bbb; }
+    .speed-select option { background: #111; }
+
+    /* Goal input */
+    .goal-input {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 5px;
+      width: 80px;
+      outline: none;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .goal-input:focus { border-color: #444; color: #bbb; }
+
+    /* Active mode badge on btn */
+    .admin-btn.active { border-color: #22c55e; color: #22c55e; background: #0a1f0a; }
+    .admin-btn.active:hover { border-color: #4ade80; color: #4ade80; background: #0d2a0d; }
+
     /* Swipe indicator dots */
     #swipe-dots {
       position: fixed;
@@ -716,6 +812,12 @@
     <div class="sdot" id="sd3"></div>
   </div>
 
+  <!-- Auto-clicker progress bar -->
+  <div id="ac-bar"><div id="ac-bar-fill"></div></div>
+
+  <!-- Matrix canvas -->
+  <canvas id="matrix-canvas"></canvas>
+
   <!-- Admin Panel -->
   <div id="admin-overlay">
     <div id="admin-panel">
@@ -727,7 +829,7 @@
         <button class="admin-close" onclick="closeAdmin()">✕</button>
       </div>
 
-      <div class="admin-body">
+      <div class="admin-body" style="max-height:80vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#222 transparent;">
 
         <!-- Stats -->
         <div class="admin-section">
@@ -748,6 +850,75 @@
             <div class="admin-row">
               <span class="admin-row-label">Flips / Minute</span>
               <span class="admin-row-value" id="a-rate">0.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auto-Clicker -->
+        <div class="admin-section">
+          <div class="admin-section-title">Auto-Clicker</div>
+          <div class="admin-rows">
+            <div class="admin-row">
+              <span class="admin-row-label">Auto-Clicker</span>
+              <label class="mini-toggle">
+                <input type="checkbox" id="a-ac" onchange="setAutoClicker(this.checked)">
+                <span class="mini-slider"></span>
+              </label>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Speed</span>
+              <select class="speed-select" id="a-speed" onchange="setAcSpeed(this.value)">
+                <option value="2000">Slow (0.5/s)</option>
+                <option value="500" selected>Normal (2/s)</option>
+                <option value="100">Fast (10/s)</option>
+                <option value="33">Insane (30/s)</option>
+                <option value="chaos">Chaos</option>
+              </select>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Turbo Mode <span style="color:#444;font-size:0.7em">(hold space)</span></span>
+              <label class="mini-toggle">
+                <input type="checkbox" id="a-turbo" onchange="adminToggle('turbo',this.checked)">
+                <span class="mini-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flip Goal -->
+        <div class="admin-section">
+          <div class="admin-section-title">Flip Goal</div>
+          <div class="admin-rows">
+            <div class="admin-row">
+              <span class="admin-row-label">Target flips</span>
+              <input class="goal-input" type="number" id="a-goal" placeholder="e.g. 500" min="1">
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Progress</span>
+              <span class="admin-row-value" id="a-goal-prog">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modes -->
+        <div class="admin-section">
+          <div class="admin-section-title">Modes</div>
+          <div class="admin-rows">
+            <div class="admin-row">
+              <span class="admin-row-label">Rage Mode <span style="color:#444;font-size:0.7em">(screen shakes)</span></span>
+              <button class="admin-btn" id="btn-rage" onclick="toggleMode('rage')">OFF</button>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Ghost Mode <span style="color:#444;font-size:0.7em">(switch fades)</span></span>
+              <button class="admin-btn" id="btn-ghost" onclick="toggleMode('ghost')">OFF</button>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Matrix Mode <span style="color:#444;font-size:0.7em">(green rain)</span></span>
+              <button class="admin-btn" id="btn-matrix" onclick="toggleMode('matrix')">OFF</button>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Teleport Mode <span style="color:#444;font-size:0.7em">(switch moves)</span></span>
+              <button class="admin-btn" id="btn-teleport" onclick="toggleMode('teleport')">OFF</button>
             </div>
           </div>
         </div>
@@ -895,9 +1066,161 @@
       adminOverlay.classList.remove('open');
     }
 
+    // ─── AUTO-CLICKER ───
+    let acInterval = null;
+    let acSpeedMs = 500;
+    let acChaos = false;
+    let acBarFill = document.getElementById('ac-bar-fill');
+    let acBarProgress = 0;
+    let acBarTick = null;
+
+    function setAcSpeed(val) {
+      acChaos = val === 'chaos';
+      acSpeedMs = acChaos ? 200 : parseInt(val);
+      document.body.classList.toggle('chaos-mode', acChaos);
+      if (acInterval) { setAutoClicker(false); setAutoClicker(true); }
+    }
+
+    function runAutoClick() {
+      if (acChaos) {
+        const delay = 50 + Math.random() * 900;
+        acInterval = setTimeout(() => { flip(); runAutoClick(); }, delay);
+      } else {
+        acInterval = setTimeout(() => { flip(); runAutoClick(); }, acSpeedMs);
+      }
+    }
+
+    function animateAcBar() {
+      const duration = acChaos ? 300 : acSpeedMs;
+      let elapsed = 0;
+      const step = 16;
+      clearInterval(acBarTick);
+      acBarTick = setInterval(() => {
+        elapsed += step;
+        const pct = Math.min((elapsed / duration) * 100, 100);
+        acBarFill.style.width = pct + '%';
+        if (pct >= 100) {
+          elapsed = 0;
+          acBarFill.style.transition = 'none';
+          acBarFill.style.width = '0%';
+          requestAnimationFrame(() => {
+            acBarFill.style.transition = '';
+          });
+        }
+      }, step);
+    }
+
+    function setAutoClicker(on) {
+      clearTimeout(acInterval);
+      clearInterval(acBarTick);
+      acBarFill.style.width = '0%';
+      if (on) {
+        runAutoClick();
+        animateAcBar();
+        adminLog(`Auto-clicker started (${acChaos ? 'chaos' : acSpeedMs + 'ms'}).`);
+      } else {
+        adminLog('Auto-clicker stopped.', 'warn');
+      }
+    }
+
+    // ─── TURBO MODE (hold space) ───
+    let turboEnabled = false;
+    let turboInterval = null;
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && turboEnabled && !e.repeat) {
+        e.preventDefault();
+        turboInterval = setInterval(() => flip(), 60);
+      }
+    });
+    document.addEventListener('keyup', e => {
+      if (e.code === 'Space' && turboEnabled) {
+        clearInterval(turboInterval);
+      }
+    });
+
+    // ─── MODES ───
+    const modes = { rage: false, ghost: false, matrix: false, teleport: false };
+    let teleportInterval = null;
+    const wallBg = document.querySelector('.wall-bg');
+
+    function toggleMode(mode) {
+      modes[mode] = !modes[mode];
+      const btn = document.getElementById('btn-' + mode);
+      btn.textContent = modes[mode] ? 'ON' : 'OFF';
+      btn.classList.toggle('active', modes[mode]);
+      document.body.classList.toggle(mode + '-mode', modes[mode]);
+      adminLog(`${mode.charAt(0).toUpperCase()+mode.slice(1)} mode ${modes[mode] ? 'enabled' : 'disabled'}.`);
+
+      if (mode === 'matrix') toggleMatrix(modes[mode]);
+      if (mode === 'teleport') toggleTeleport(modes[mode]);
+    }
+
+    // Matrix rain
+    const matCanvas = document.getElementById('matrix-canvas');
+    const matCtx = matCanvas.getContext('2d');
+    let matRaf = null;
+    const matChars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+    let matCols = [], matDrops = [];
+
+    function initMatrix() {
+      matCanvas.width = window.innerWidth;
+      matCanvas.height = window.innerHeight;
+      const cols = Math.floor(matCanvas.width / 16);
+      matDrops = Array(cols).fill(1);
+    }
+
+    function drawMatrix() {
+      matCtx.fillStyle = 'rgba(0,0,0,0.05)';
+      matCtx.fillRect(0, 0, matCanvas.width, matCanvas.height);
+      matCtx.fillStyle = '#22c55e';
+      matCtx.font = '14px monospace';
+      matDrops.forEach((y, i) => {
+        const ch = matChars[Math.floor(Math.random() * matChars.length)];
+        matCtx.fillText(ch, i * 16, y * 16);
+        if (y * 16 > matCanvas.height && Math.random() > 0.975) matDrops[i] = 0;
+        matDrops[i]++;
+      });
+      matRaf = requestAnimationFrame(drawMatrix);
+    }
+
+    function toggleMatrix(on) {
+      if (on) { initMatrix(); drawMatrix(); }
+      else { cancelAnimationFrame(matRaf); matCtx.clearRect(0, 0, matCanvas.width, matCanvas.height); }
+    }
+    window.addEventListener('resize', () => { if (modes.matrix) initMatrix(); });
+
+    // Teleport
+    function doTeleport() {
+      const maxX = window.innerWidth  - 180;
+      const maxY = window.innerHeight - 260;
+      const x = Math.max(20, Math.random() * maxX);
+      const y = Math.max(20, Math.random() * maxY);
+      wallBg.style.position = 'fixed';
+      wallBg.style.left = x + 'px';
+      wallBg.style.top  = y + 'px';
+      wallBg.style.zIndex = '2';
+      wallBg.classList.remove('teleporting');
+      void wallBg.offsetWidth;
+      wallBg.classList.add('teleporting');
+    }
+
+    function toggleTeleport(on) {
+      clearInterval(teleportInterval);
+      if (on) {
+        doTeleport();
+        teleportInterval = setInterval(doTeleport, 1800);
+      } else {
+        wallBg.style.position = '';
+        wallBg.style.left = '';
+        wallBg.style.top  = '';
+        wallBg.style.zIndex = '';
+      }
+    }
+
     function adminToggle(setting, val) {
       if (setting === 'sound') { soundEnabled = val; adminLog(`Sound effects ${val ? 'enabled' : 'disabled'}.`); }
       if (setting === 'spark') { sparkEnabled = val; adminLog(`Spark animation ${val ? 'enabled' : 'disabled'}.`); }
+      if (setting === 'turbo') { turboEnabled = val; adminLog(`Turbo mode ${val ? 'enabled' : 'disabled'}.`); }
       if (setting === 'light') {
         lightEnabled = val;
         document.querySelector('.room-light').style.display = val ? '' : 'none';
@@ -911,6 +1234,23 @@
       document.getElementById('a-flips').textContent = 0;
       adminLog('Flip counter reset to 0.', 'warn');
     }
+
+    // ─── FLIP GOAL ───
+    let goalNotified = false;
+    function checkGoal() {
+      const goalInput = document.getElementById('a-goal');
+      const goal = parseInt(goalInput.value);
+      if (!goal || isNaN(goal)) return;
+      const prog = document.getElementById('a-goal-prog');
+      prog.textContent = `${flips} / ${goal}`;
+      if (flips >= goal && !goalNotified) {
+        goalNotified = true;
+        showAchievement(`Goal reached: ${goal} flips!`);
+        adminLog(`Flip goal of ${goal} reached!`, '');
+      }
+      if (flips < goal) goalNotified = false;
+    }
+    document.getElementById('a-goal').addEventListener('input', () => { goalNotified = false; checkGoal(); });
 
     // Close on overlay click outside panel
     adminOverlay.addEventListener('click', e => {
@@ -928,6 +1268,7 @@
       if (soundEnabled) playClick();
       if (sparkEnabled) spawnSpark();
       if (ACHIEVEMENTS[flips]) showAchievement('Achievement unlocked: ' + ACHIEVEMENTS[flips]);
+      checkGoal();
       adminLog(`Switch flipped ${on ? 'ON' : 'OFF'}. Total: ${flips}.`);
     }
 
