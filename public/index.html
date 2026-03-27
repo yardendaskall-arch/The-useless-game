@@ -447,6 +447,213 @@
       position: relative;
       z-index: 1;
     }
+
+    /* ─── ADMIN PANEL ─── */
+    #admin-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    #admin-overlay.open { display: flex; }
+
+    #admin-panel {
+      width: min(480px, 92vw);
+      background: #0d0d0d;
+      border: 1px solid #222;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+      animation: panel-in 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes panel-in {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: #111;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .admin-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-badge {
+      background: #c00;
+      color: #fff;
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+
+    .admin-title h2 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #ddd;
+      text-transform: uppercase;
+    }
+
+    .admin-close {
+      background: none;
+      border: 1px solid #333;
+      color: #666;
+      width: 28px;
+      height: 28px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .admin-close:hover { border-color: #555; color: #aaa; }
+
+    .admin-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .admin-section {
+      border: 1px solid #1a1a1a;
+      border-radius: 7px;
+      overflow: hidden;
+    }
+
+    .admin-section-title {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #444;
+      padding: 8px 14px;
+      background: #111;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .admin-rows { padding: 4px 0; }
+
+    .admin-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #888;
+      border-bottom: 1px solid #141414;
+      gap: 16px;
+    }
+    .admin-row:last-child { border-bottom: none; }
+
+    .admin-row-label { flex: 1; }
+
+    .admin-row-value {
+      color: #555;
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Toggle switch (mini) */
+    .mini-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .mini-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .mini-slider {
+      position: absolute;
+      inset: 0;
+      background: #222;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: 1px solid #333;
+    }
+    .mini-slider::before {
+      content: '';
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 2px;
+      top: 2px;
+      border-radius: 50%;
+      background: #444;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .mini-toggle input:checked + .mini-slider { background: #1a3a1a; border-color: #2a5a2a; }
+    .mini-toggle input:checked + .mini-slider::before { transform: translateX(16px); background: #22c55e; }
+
+    /* Button */
+    .admin-btn {
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      padding: 5px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .admin-btn:hover { border-color: #444; color: #bbb; background: #1e1e1e; }
+    .admin-btn.danger { border-color: #3a1010; color: #a04040; }
+    .admin-btn.danger:hover { border-color: #8b0000; color: #ff6666; background: #1a0808; }
+
+    /* Log */
+    .admin-log {
+      font-family: 'Courier New', monospace;
+      font-size: 0.7rem;
+      color: #3a3a3a;
+      padding: 10px 14px;
+      max-height: 90px;
+      overflow-y: auto;
+      line-height: 1.6;
+      scrollbar-width: thin;
+      scrollbar-color: #222 transparent;
+    }
+    .admin-log .log-line { color: #3d5a3d; }
+    .admin-log .log-line.warn { color: #5a4a1a; }
+    .admin-log .log-line.err  { color: #5a1a1a; }
+
+    /* Swipe indicator dots */
+    #swipe-dots {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      display: flex;
+      gap: 4px;
+      z-index: 150;
+      pointer-events: none;
+    }
+    .sdot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #222;
+      transition: background 0.15s;
+    }
+    .sdot.active { background: #555; }
   </style>
 </head>
 <body>
@@ -501,6 +708,92 @@
 
   <div id="achievement"></div>
 
+  <!-- Swipe progress dots -->
+  <div id="swipe-dots">
+    <div class="sdot" id="sd0"></div>
+    <div class="sdot" id="sd1"></div>
+    <div class="sdot" id="sd2"></div>
+    <div class="sdot" id="sd3"></div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="admin-overlay">
+    <div id="admin-panel">
+      <div class="admin-header">
+        <div class="admin-title">
+          <span class="admin-badge">Admin</span>
+          <h2>Control Panel</h2>
+        </div>
+        <button class="admin-close" onclick="closeAdmin()">✕</button>
+      </div>
+
+      <div class="admin-body">
+
+        <!-- Stats -->
+        <div class="admin-section">
+          <div class="admin-section-title">System Status</div>
+          <div class="admin-rows">
+            <div class="admin-row">
+              <span class="admin-row-label">Switch State</span>
+              <span class="admin-row-value" id="a-state">OFFLINE</span>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Total Flips</span>
+              <span class="admin-row-value" id="a-flips">0</span>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Uptime</span>
+              <span class="admin-row-value" id="a-uptime">0:00</span>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Flips / Minute</span>
+              <span class="admin-row-value" id="a-rate">0.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="admin-section">
+          <div class="admin-section-title">Settings</div>
+          <div class="admin-rows">
+            <div class="admin-row">
+              <span class="admin-row-label">Sound Effects</span>
+              <label class="mini-toggle">
+                <input type="checkbox" id="a-sound" checked onchange="adminToggle('sound',this.checked)">
+                <span class="mini-slider"></span>
+              </label>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Spark Animation</span>
+              <label class="mini-toggle">
+                <input type="checkbox" id="a-spark" checked onchange="adminToggle('spark',this.checked)">
+                <span class="mini-slider"></span>
+              </label>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Room Lighting</span>
+              <label class="mini-toggle">
+                <input type="checkbox" id="a-light" checked onchange="adminToggle('light',this.checked)">
+                <span class="mini-slider"></span>
+              </label>
+            </div>
+            <div class="admin-row">
+              <span class="admin-row-label">Flip Counter</span>
+              <button class="admin-btn danger" onclick="adminReset()">Reset to 0</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Log -->
+        <div class="admin-section">
+          <div class="admin-section-title">Event Log</div>
+          <div class="admin-log" id="admin-log"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script>
     let on = false;
     let flips = 0;
@@ -549,21 +842,7 @@
       s.addEventListener('animationend', () => s.remove());
     }
 
-    function flip() {
-      on = !on;
-      flips++;
-
-      switchEl.classList.toggle('on', on);
-      document.body.classList.toggle('is-on', on);
-
-      flipCount.textContent = flips;
-      statusEl.textContent = on ? 'The switch is ON.' : 'The switch is OFF.';
-
-      playClick();
-      spawnSpark();
-
-      if (ACHIEVEMENTS[flips]) showAchievement('Achievement unlocked: ' + ACHIEVEMENTS[flips]);
-    }
+    // flip() is defined fully below after admin settings are initialized
 
     function showAchievement(text) {
       clearTimeout(achievementTimer);
@@ -581,6 +860,133 @@
 
     document.addEventListener('keydown', e => {
       if (e.code === 'Space') { e.preventDefault(); flip(); }
+    });
+
+    // ─── ADMIN PANEL ───
+    let soundEnabled = true;
+    let sparkEnabled = true;
+    let lightEnabled = true;
+
+    const adminOverlay = document.getElementById('admin-overlay');
+    const logEl = document.getElementById('admin-log');
+
+    function adminLog(msg, type = '') {
+      const line = document.createElement('div');
+      line.className = 'log-line' + (type ? ' ' + type : '');
+      const t = new Date().toLocaleTimeString('en-US', { hour12: false });
+      line.textContent = `[${t}] ${msg}`;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function openAdmin() {
+      adminOverlay.classList.add('open');
+      document.getElementById('a-state').textContent = on ? 'ONLINE' : 'OFFLINE';
+      document.getElementById('a-flips').textContent = flips;
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      const m = Math.floor(elapsed / 60), s = String(elapsed % 60).padStart(2,'0');
+      document.getElementById('a-uptime').textContent = `${m}:${s}`;
+      const rate = elapsed > 0 ? (flips / (elapsed / 60)).toFixed(1) : '0.0';
+      document.getElementById('a-rate').textContent = rate;
+      adminLog('Admin panel accessed via gesture.', '');
+    }
+
+    function closeAdmin() {
+      adminOverlay.classList.remove('open');
+    }
+
+    function adminToggle(setting, val) {
+      if (setting === 'sound') { soundEnabled = val; adminLog(`Sound effects ${val ? 'enabled' : 'disabled'}.`); }
+      if (setting === 'spark') { sparkEnabled = val; adminLog(`Spark animation ${val ? 'enabled' : 'disabled'}.`); }
+      if (setting === 'light') {
+        lightEnabled = val;
+        document.querySelector('.room-light').style.display = val ? '' : 'none';
+        adminLog(`Room lighting ${val ? 'enabled' : 'disabled'}.`);
+      }
+    }
+
+    function adminReset() {
+      flips = 0;
+      flipCount.textContent = 0;
+      document.getElementById('a-flips').textContent = 0;
+      adminLog('Flip counter reset to 0.', 'warn');
+    }
+
+    // Close on overlay click outside panel
+    adminOverlay.addEventListener('click', e => {
+      if (e.target === adminOverlay) closeAdmin();
+    });
+
+    // Main flip function (respects admin settings)
+    function flip() {
+      on = !on;
+      flips++;
+      switchEl.classList.toggle('on', on);
+      if (lightEnabled) document.body.classList.toggle('is-on', on);
+      flipCount.textContent = flips;
+      statusEl.textContent = on ? 'The switch is ON.' : 'The switch is OFF.';
+      if (soundEnabled) playClick();
+      if (sparkEnabled) spawnSpark();
+      if (ACHIEVEMENTS[flips]) showAchievement('Achievement unlocked: ' + ACHIEVEMENTS[flips]);
+      adminLog(`Switch flipped ${on ? 'ON' : 'OFF'}. Total: ${flips}.`);
+    }
+
+    // ─── SWIPE GESTURE: up → down → left → right ───
+    const SEQUENCE = ['up', 'down', 'left', 'right'];
+    let gestureProgress = 0;
+    let touchStartX = 0, touchStartY = 0;
+    let gestureResetTimer = null;
+    const dots = [0,1,2,3].map(i => document.getElementById('sd' + i));
+
+    function updateDots() {
+      dots.forEach((d, i) => d.classList.toggle('active', i < gestureProgress));
+    }
+
+    function advanceGesture(dir) {
+      if (dir === SEQUENCE[gestureProgress]) {
+        gestureProgress++;
+        updateDots();
+        clearTimeout(gestureResetTimer);
+        if (gestureProgress === SEQUENCE.length) {
+          gestureProgress = 0;
+          updateDots();
+          openAdmin();
+        } else {
+          gestureResetTimer = setTimeout(() => { gestureProgress = 0; updateDots(); }, 2000);
+        }
+      } else {
+        // Wrong direction — restart from 1 if this matches first, else 0
+        gestureProgress = (dir === SEQUENCE[0]) ? 1 : 0;
+        updateDots();
+        clearTimeout(gestureResetTimer);
+        if (gestureProgress > 0) {
+          gestureResetTimer = setTimeout(() => { gestureProgress = 0; updateDots(); }, 2000);
+        }
+      }
+    }
+
+    // Touch events
+    document.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      const absDx = Math.abs(dx), absDy = Math.abs(dy);
+      const MIN = 40; // minimum swipe distance px
+      if (Math.max(absDx, absDy) < MIN) return;
+      let dir;
+      if (absDy > absDx) dir = dy < 0 ? 'up' : 'down';
+      else                dir = dx < 0 ? 'left' : 'right';
+      advanceGesture(dir);
+    }, { passive: true });
+
+    // Keyboard arrow keys (desktop testing: ↑ ↓ ← →)
+    document.addEventListener('keydown', e => {
+      const map = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right' };
+      if (map[e.key]) { e.preventDefault(); advanceGesture(map[e.key]); }
     });
   </script>
 </body>
