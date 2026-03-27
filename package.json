@@ -1,0 +1,18 @@
+{
+  "name": "the-useless-game",
+  "version": "1.0.0",
+  "description": "The most useless game: flip a switch on and off. That's it.",
+  "main": "index.js",
+  "bin": {
+    "useless-game": "./bin/useless-game.js"
+  },
+  "scripts": {
+    "start": "node bin/useless-game.js"
+  },
+  "keywords": ["useless", "game", "switch", "flip"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
