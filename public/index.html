@@ -732,6 +732,44 @@
     .admin-btn.active { border-color: #22c55e; color: #22c55e; background: #0a1f0a; }
     .admin-btn.active:hover { border-color: #4ade80; color: #4ade80; background: #0d2a0d; }
 
+    /* ─── TABS ─── */
+    .admin-tabs {
+      display: flex;
+      border-bottom: 1px solid #1a1a1a;
+      background: #0d0d0d;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .admin-tabs::-webkit-scrollbar { display: none; }
+
+    .admin-tab {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #444;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .admin-tab:hover { color: #777; }
+    .admin-tab.active { color: #ccc; border-bottom-color: #22c55e; }
+
+    .admin-tab-panel {
+      display: none;
+      height: 260px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #222 transparent;
+    }
+    .admin-tab-panel::-webkit-scrollbar { width: 4px; }
+    .admin-tab-panel::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+    .admin-tab-panel.active { display: block; }
+
     /* Swipe indicator dots */
     #swipe-dots {
       position: fixed;
@@ -829,138 +867,158 @@
         <button class="admin-close" onclick="closeAdmin()">✕</button>
       </div>
 
-      <div class="admin-body" style="max-height:80vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#222 transparent;">
+      <!-- Tab bar -->
+      <div class="admin-tabs">
+        <div class="admin-tab active" data-tab="status" onclick="switchTab('status')">Status</div>
+        <div class="admin-tab" data-tab="clicker" onclick="switchTab('clicker')">Auto-Click</div>
+        <div class="admin-tab" data-tab="goal" onclick="switchTab('goal')">Goal</div>
+        <div class="admin-tab" data-tab="modes" onclick="switchTab('modes')">Modes</div>
+        <div class="admin-tab" data-tab="settings" onclick="switchTab('settings')">Settings</div>
+        <div class="admin-tab" data-tab="log" onclick="switchTab('log')">Log</div>
+      </div>
 
-        <!-- Stats -->
-        <div class="admin-section">
-          <div class="admin-section-title">System Status</div>
-          <div class="admin-rows">
-            <div class="admin-row">
-              <span class="admin-row-label">Switch State</span>
-              <span class="admin-row-value" id="a-state">OFFLINE</span>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Total Flips</span>
-              <span class="admin-row-value" id="a-flips">0</span>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Uptime</span>
-              <span class="admin-row-value" id="a-uptime">0:00</span>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Flips / Minute</span>
-              <span class="admin-row-value" id="a-rate">0.0</span>
-            </div>
+      <!-- Status tab -->
+      <div class="admin-tab-panel active" id="tab-status">
+        <div class="admin-rows">
+          <div class="admin-row">
+            <span class="admin-row-label">Switch State</span>
+            <span class="admin-row-value" id="a-state">OFFLINE</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Total Flips</span>
+            <span class="admin-row-value" id="a-flips">0</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Uptime</span>
+            <span class="admin-row-value" id="a-uptime">0:00</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Flips / Minute</span>
+            <span class="admin-row-value" id="a-rate">0.0</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Fastest Streak</span>
+            <span class="admin-row-value" id="a-streak">—</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Last Flip</span>
+            <span class="admin-row-value" id="a-last">—</span>
           </div>
         </div>
+      </div>
 
-        <!-- Auto-Clicker -->
-        <div class="admin-section">
-          <div class="admin-section-title">Auto-Clicker</div>
-          <div class="admin-rows">
-            <div class="admin-row">
-              <span class="admin-row-label">Auto-Clicker</span>
-              <label class="mini-toggle">
-                <input type="checkbox" id="a-ac" onchange="setAutoClicker(this.checked)">
-                <span class="mini-slider"></span>
-              </label>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Speed</span>
-              <select class="speed-select" id="a-speed" onchange="setAcSpeed(this.value)">
-                <option value="2000">Slow (0.5/s)</option>
-                <option value="500" selected>Normal (2/s)</option>
-                <option value="100">Fast (10/s)</option>
-                <option value="33">Insane (30/s)</option>
-                <option value="chaos">Chaos</option>
-              </select>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Turbo Mode <span style="color:#444;font-size:0.7em">(hold space)</span></span>
-              <label class="mini-toggle">
-                <input type="checkbox" id="a-turbo" onchange="adminToggle('turbo',this.checked)">
-                <span class="mini-slider"></span>
-              </label>
-            </div>
+      <!-- Auto-Clicker tab -->
+      <div class="admin-tab-panel" id="tab-clicker">
+        <div class="admin-rows">
+          <div class="admin-row">
+            <span class="admin-row-label">Auto-Clicker</span>
+            <label class="mini-toggle">
+              <input type="checkbox" id="a-ac" onchange="setAutoClicker(this.checked)">
+              <span class="mini-slider"></span>
+            </label>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Speed</span>
+            <select class="speed-select" id="a-speed" onchange="setAcSpeed(this.value)">
+              <option value="2000">Slow (0.5/s)</option>
+              <option value="500" selected>Normal (2/s)</option>
+              <option value="100">Fast (10/s)</option>
+              <option value="33">Insane (30/s)</option>
+              <option value="chaos">Chaos</option>
+            </select>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Turbo Mode <span style="color:#444;font-size:0.7em">(hold space)</span></span>
+            <label class="mini-toggle">
+              <input type="checkbox" id="a-turbo" onchange="adminToggle('turbo',this.checked)">
+              <span class="mini-slider"></span>
+            </label>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Auto-click count</span>
+            <span class="admin-row-value" id="a-ac-count">0</span>
           </div>
         </div>
+      </div>
 
-        <!-- Flip Goal -->
-        <div class="admin-section">
-          <div class="admin-section-title">Flip Goal</div>
-          <div class="admin-rows">
-            <div class="admin-row">
-              <span class="admin-row-label">Target flips</span>
-              <input class="goal-input" type="number" id="a-goal" placeholder="e.g. 500" min="1">
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Progress</span>
-              <span class="admin-row-value" id="a-goal-prog">—</span>
-            </div>
+      <!-- Goal tab -->
+      <div class="admin-tab-panel" id="tab-goal">
+        <div class="admin-rows">
+          <div class="admin-row">
+            <span class="admin-row-label">Target flips</span>
+            <input class="goal-input" type="number" id="a-goal" placeholder="e.g. 500" min="1">
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Progress</span>
+            <span class="admin-row-value" id="a-goal-prog">—</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Remaining</span>
+            <span class="admin-row-value" id="a-goal-rem">—</span>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">ETA (at current rate)</span>
+            <span class="admin-row-value" id="a-goal-eta">—</span>
           </div>
         </div>
+      </div>
 
-        <!-- Modes -->
-        <div class="admin-section">
-          <div class="admin-section-title">Modes</div>
-          <div class="admin-rows">
-            <div class="admin-row">
-              <span class="admin-row-label">Rage Mode <span style="color:#444;font-size:0.7em">(screen shakes)</span></span>
-              <button class="admin-btn" id="btn-rage" onclick="toggleMode('rage')">OFF</button>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Ghost Mode <span style="color:#444;font-size:0.7em">(switch fades)</span></span>
-              <button class="admin-btn" id="btn-ghost" onclick="toggleMode('ghost')">OFF</button>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Matrix Mode <span style="color:#444;font-size:0.7em">(green rain)</span></span>
-              <button class="admin-btn" id="btn-matrix" onclick="toggleMode('matrix')">OFF</button>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Teleport Mode <span style="color:#444;font-size:0.7em">(switch moves)</span></span>
-              <button class="admin-btn" id="btn-teleport" onclick="toggleMode('teleport')">OFF</button>
-            </div>
+      <!-- Modes tab -->
+      <div class="admin-tab-panel" id="tab-modes">
+        <div class="admin-rows">
+          <div class="admin-row">
+            <span class="admin-row-label">Rage Mode <span style="color:#444;font-size:0.7em">(screen shakes)</span></span>
+            <button class="admin-btn" id="btn-rage" onclick="toggleMode('rage')">OFF</button>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Ghost Mode <span style="color:#444;font-size:0.7em">(switch fades)</span></span>
+            <button class="admin-btn" id="btn-ghost" onclick="toggleMode('ghost')">OFF</button>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Matrix Mode <span style="color:#444;font-size:0.7em">(green rain)</span></span>
+            <button class="admin-btn" id="btn-matrix" onclick="toggleMode('matrix')">OFF</button>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Teleport Mode <span style="color:#444;font-size:0.7em">(switch moves)</span></span>
+            <button class="admin-btn" id="btn-teleport" onclick="toggleMode('teleport')">OFF</button>
           </div>
         </div>
+      </div>
 
-        <!-- Settings -->
-        <div class="admin-section">
-          <div class="admin-section-title">Settings</div>
-          <div class="admin-rows">
-            <div class="admin-row">
-              <span class="admin-row-label">Sound Effects</span>
-              <label class="mini-toggle">
-                <input type="checkbox" id="a-sound" checked onchange="adminToggle('sound',this.checked)">
-                <span class="mini-slider"></span>
-              </label>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Spark Animation</span>
-              <label class="mini-toggle">
-                <input type="checkbox" id="a-spark" checked onchange="adminToggle('spark',this.checked)">
-                <span class="mini-slider"></span>
-              </label>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Room Lighting</span>
-              <label class="mini-toggle">
-                <input type="checkbox" id="a-light" checked onchange="adminToggle('light',this.checked)">
-                <span class="mini-slider"></span>
-              </label>
-            </div>
-            <div class="admin-row">
-              <span class="admin-row-label">Flip Counter</span>
-              <button class="admin-btn danger" onclick="adminReset()">Reset to 0</button>
-            </div>
+      <!-- Settings tab -->
+      <div class="admin-tab-panel" id="tab-settings">
+        <div class="admin-rows">
+          <div class="admin-row">
+            <span class="admin-row-label">Sound Effects</span>
+            <label class="mini-toggle">
+              <input type="checkbox" id="a-sound" checked onchange="adminToggle('sound',this.checked)">
+              <span class="mini-slider"></span>
+            </label>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Spark Animation</span>
+            <label class="mini-toggle">
+              <input type="checkbox" id="a-spark" checked onchange="adminToggle('spark',this.checked)">
+              <span class="mini-slider"></span>
+            </label>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Room Lighting</span>
+            <label class="mini-toggle">
+              <input type="checkbox" id="a-light" checked onchange="adminToggle('light',this.checked)">
+              <span class="mini-slider"></span>
+            </label>
+          </div>
+          <div class="admin-row">
+            <span class="admin-row-label">Flip Counter</span>
+            <button class="admin-btn danger" onclick="adminReset()">Reset to 0</button>
           </div>
         </div>
+      </div>
 
-        <!-- Log -->
-        <div class="admin-section">
-          <div class="admin-section-title">Event Log</div>
-          <div class="admin-log" id="admin-log"></div>
-        </div>
-
+      <!-- Log tab -->
+      <div class="admin-tab-panel" id="tab-log">
+        <div class="admin-log" id="admin-log" style="max-height:260px;height:260px;"></div>
       </div>
     </div>
   </div>
@@ -1050,8 +1108,18 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function openAdmin() {
-      adminOverlay.classList.add('open');
+    // ─── TABS ───
+    function switchTab(name) {
+      document.querySelectorAll('.admin-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === name);
+      });
+      document.querySelectorAll('.admin-tab-panel').forEach(p => {
+        p.classList.toggle('active', p.id === 'tab-' + name);
+      });
+      if (name === 'status') refreshStatusTab();
+    }
+
+    function refreshStatusTab() {
       document.getElementById('a-state').textContent = on ? 'ONLINE' : 'OFFLINE';
       document.getElementById('a-flips').textContent = flips;
       const elapsed = Math.floor((Date.now() - start) / 1000);
@@ -1059,6 +1127,24 @@
       document.getElementById('a-uptime').textContent = `${m}:${s}`;
       const rate = elapsed > 0 ? (flips / (elapsed / 60)).toFixed(1) : '0.0';
       document.getElementById('a-rate').textContent = rate;
+      document.getElementById('a-streak').textContent = fastestStreak > 0 ? fastestStreak + ' flips in 5s' : '—';
+      document.getElementById('a-last').textContent = lastFlipTime ? new Date(lastFlipTime).toLocaleTimeString() : '—';
+    }
+
+    let fastestStreak = 0, recentFlips = [], lastFlipTime = null;
+
+    function trackFlipStats() {
+      const now = Date.now();
+      lastFlipTime = now;
+      recentFlips.push(now);
+      recentFlips = recentFlips.filter(t => now - t <= 5000);
+      if (recentFlips.length > fastestStreak) fastestStreak = recentFlips.length;
+      document.getElementById('a-ac-count') && (document.getElementById('a-ac-count').textContent = flips);
+    }
+
+    function openAdmin() {
+      adminOverlay.classList.add('open');
+      refreshStatusTab();
       adminLog('Admin panel accessed via gesture.', '');
     }
 
@@ -1241,8 +1327,18 @@
       const goalInput = document.getElementById('a-goal');
       const goal = parseInt(goalInput.value);
       if (!goal || isNaN(goal)) return;
-      const prog = document.getElementById('a-goal-prog');
-      prog.textContent = `${flips} / ${goal}`;
+      document.getElementById('a-goal-prog').textContent = `${flips} / ${goal}`;
+      const rem = Math.max(0, goal - flips);
+      document.getElementById('a-goal-rem').textContent = rem > 0 ? rem : 'Done!';
+      const elapsed = (Date.now() - start) / 60000;
+      const rate = elapsed > 0 ? flips / elapsed : 0;
+      if (rem > 0 && rate > 0) {
+        const etaMins = rem / rate;
+        document.getElementById('a-goal-eta').textContent =
+          etaMins < 1 ? `${Math.ceil(etaMins * 60)}s` : `${etaMins.toFixed(1)} min`;
+      } else {
+        document.getElementById('a-goal-eta').textContent = rem === 0 ? '✓' : '—';
+      }
       if (flips >= goal && !goalNotified) {
         goalNotified = true;
         showAchievement(`Goal reached: ${goal} flips!`);
@@ -1268,6 +1364,7 @@
       if (soundEnabled) playClick();
       if (sparkEnabled) spawnSpark();
       if (ACHIEVEMENTS[flips]) showAchievement('Achievement unlocked: ' + ACHIEVEMENTS[flips]);
+      trackFlipStats();
       checkGoal();
       adminLog(`Switch flipped ${on ? 'ON' : 'OFF'}. Total: ${flips}.`);
     }
