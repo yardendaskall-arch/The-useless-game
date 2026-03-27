@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Useless Game</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      user-select: none;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #444;
+      margin-bottom: 48px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Switch */
+    .switch-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .switch-plate {
+      width: 140px;
+      height: 220px;
+      background: #1a1a1a;
+      border-radius: 16px;
+      border: 2px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .switch-plate:hover {
+      border-color: #555;
+    }
+
+    .switch-plate.on {
+      border-color: #22c55e;
+      box-shadow: 0 0 32px #22c55e44, 0 0 8px #22c55e22;
+    }
+
+    /* Toggle paddle */
+    .paddle {
+      width: 80px;
+      height: 140px;
+      background: #2d2d2d;
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.2s;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .paddle-half {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      transition: background 0.25s, color 0.25s;
+      border-radius: 8px;
+    }
+
+    .paddle-top {
+      background: #222;
+      color: #333;
+    }
+
+    .paddle-bottom {
+      background: #333;
+      color: #555;
+    }
+
+    /* ON state: top half lights up */
+    .switch-plate.on .paddle-top {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .switch-plate.on .paddle-bottom {
+      background: #1a1a1a;
+      color: #2a2a2a;
+    }
+
+    /* Label above/below paddle */
+    .label-on, .label-off {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      font-weight: 700;
+      padding: 2px 0;
+    }
+
+    .label-on { color: #22c55e; }
+    .label-off { color: #333; }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: #444;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Achievement toast */
+    #achievement {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a1a;
+      border: 1px solid #22c55e;
+      color: #22c55e;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    #achievement.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Status text */
+    #status-text {
+      font-size: 0.9rem;
+      color: #555;
+      height: 20px;
+      transition: color 0.2s;
+    }
+
+    body.is-on #status-text {
+      color: #22c55e;
+    }
+
+    /* Click pulse */
+    @keyframes pulse {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(0.96); }
+      100% { transform: scale(1); }
+    }
+
+    .switch-plate.clicking {
+      animation: pulse 0.12s ease;
+    }
+
+    /* Hint */
+    .hint {
+      margin-top: 40px;
+      font-size: 0.75rem;
+      color: #333;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>The Useless Game</h1>
+  <p class="subtitle">a masterpiece of interactive entertainment</p>
+
+  <div class="switch-wrap">
+    <div class="switch-plate" id="switch" onclick="flip()">
+      <div class="paddle">
+        <div class="paddle-half paddle-top">ON</div>
+        <div class="paddle-half paddle-bottom">OFF</div>
+      </div>
+    </div>
+
+    <p id="status-text">The switch is OFF.</p>
+
+    <div class="stats">
+      <div>
+        <div class="stat-label">Flips</div>
+        <div class="stat-value" id="flip-count">0</div>
+      </div>
+      <div>
+        <div class="stat-label">Time Wasted</div>
+        <div class="stat-value" id="timer">0:00</div>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Click the switch. Seriously, that's the whole game.</p>
+
+  <div id="achievement"></div>
+
+  <script>
+    let on = false;
+    let flips = 0;
+    let start = Date.now();
+    let achievementTimer = null;
+
+    const switchEl = document.getElementById('switch');
+    const flipCount = document.getElementById('flip-count');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status-text');
+    const achievementEl = document.getElementById('achievement');
+
+    const ACHIEVEMENTS = {
+      1:    'Achievement: "First Flip" 🎉',
+      10:   'Achievement: "Double Digits" 📈',
+      50:   'Achievement: "Are You OK?" 🤔',
+      100:  'Achievement: "Centurion of Boredom" 🏅',
+      500:  'Achievement: "Deeply Committed" 😶',
+      1000: 'Achievement: "You Need Help" 🚨',
+    };
+
+    function flip() {
+      on = !on;
+      flips++;
+
+      switchEl.classList.toggle('on', on);
+      document.body.classList.toggle('is-on', on);
+
+      flipCount.textContent = flips;
+      statusEl.textContent = on ? 'The switch is ON.' : 'The switch is OFF.';
+
+      // Click animation
+      switchEl.classList.remove('clicking');
+      void switchEl.offsetWidth;
+      switchEl.classList.add('clicking');
+
+      // Check achievement
+      if (ACHIEVEMENTS[flips]) showAchievement(ACHIEVEMENTS[flips]);
+    }
+
+    function showAchievement(text) {
+      clearTimeout(achievementTimer);
+      achievementEl.textContent = text;
+      achievementEl.classList.add('show');
+      achievementTimer = setTimeout(() => achievementEl.classList.remove('show'), 3000);
+    }
+
+    // Timer
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      const m = Math.floor(elapsed / 60);
+      const s = String(elapsed % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+    }, 500);
+
+    // Space bar support
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') { e.preventDefault(); flip(); }
+    });
+  </script>
+</body>
+</html>
