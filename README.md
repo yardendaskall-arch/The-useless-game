@@ -6,20 +6,26 @@ That's it. That's the game.
 
 ## Install
 
+This package is not published to npm. Install it directly from the downloaded folder.
+
+**Step 1 — Download or clone the repo, then open a terminal in the project folder.**
+
+**Step 2 — Install globally from the local folder:**
+
 ```bash
-npm install -g the-useless-game
+npm install -g .
 ```
 
-## Play
+**Step 3 — Play:**
 
 ```bash
 useless-game
 ```
 
-Or without installing:
+### Uninstall
 
 ```bash
-npx the-useless-game
+npm uninstall -g the-useless-game
 ```
 
 ## Controls
