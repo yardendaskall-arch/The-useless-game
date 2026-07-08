@@ -2,6 +2,16 @@ name: Build Android APK
 
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - claude/fin-game-apk-nstvtj
+    paths:
+      - '.github/workflows/build-apk.yml'
+      - 'android/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'capacitor.config.json'
 
 permissions:
   contents: write
