@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">The Useless Game</string>
+    <string name="title_activity_main">The Useless Game</string>
+    <string name="package_name">com.uselessgame.app</string>
+    <string name="custom_url_scheme">com.uselessgame.app</string>
+</resources>

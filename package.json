@@ -14,5 +14,10 @@
   "license": "MIT",
   "engines": {
     "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
   }
 }
