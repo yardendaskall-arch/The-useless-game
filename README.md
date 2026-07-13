@@ -53,3 +53,20 @@ npm uninstall -g the-useless-game
 | 100   | Centurion of Boredom      |
 | 500   | Deeply Committed          |
 | 1000  | You Need Help             |
+
+## Pokédex Scanner
+
+The web deployment also includes a `/pokedex` page: take or upload a photo of a Pokémon plushie, toy,
+drawing, or anything that resembles a Pokémon, and it returns the full Pokédex entry (types, abilities,
+stats, flavor text, and more).
+
+It works by sending the photo to Claude's vision API to identify the Pokémon, then pulling the entry
+from [PokéAPI](https://pokeapi.co/).
+
+### Setup
+
+To enable it on your Vercel deployment, set an environment variable in your Vercel project settings:
+
+- `ANTHROPIC_API_KEY` — an API key from the [Anthropic Console](https://console.anthropic.com/)
+
+Optionally set `ANTHROPIC_MODEL` to override the default vision model (`claude-sonnet-5`).

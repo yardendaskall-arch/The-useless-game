@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pokédex Scanner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #1c1a17;
+    color: #ddd;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    padding: 32px 16px 64px;
+  }
+
+  .top-nav {
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 20px;
+  }
+  .top-nav a {
+    color: #777;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+  }
+  .top-nav a:hover { color: #aaa; }
+
+  h1 {
+    font-size: 1.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #e6473b;
+    text-shadow: 0 0 12px rgba(230,71,59,0.35);
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 32px;
+    text-align: center;
+    max-width: 420px;
+  }
+
+  .scanner {
+    width: 100%;
+    max-width: 420px;
+    background: #24211c;
+    border: 1px solid #363228;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  .preview {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #171512;
+    border: 2px dashed #3a352c;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-bottom: 18px;
+    color: #555;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 12px;
+  }
+  .preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: #343026;
+    color: #ccc;
+  }
+  .btn-secondary:hover:not(:disabled) { background: #3d382c; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #e6473b, #c8342a);
+    color: #fff;
+    width: 100%;
+    padding: 14px;
+    margin-top: 4px;
+  }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+  #camera-input, #upload-input { display: none; }
+
+  .status-msg {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 14px;
+    min-height: 1.2em;
+  }
+  .status-msg.error { color: #e6473b; }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.7s linear infinite;
+    vertical-align: -3px;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Result card */
+  .result-card {
+    width: 100%;
+    max-width: 420px;
+    margin-top: 24px;
+    background: #24211c;
+    border: 1px solid #363228;
+    border-radius: 16px;
+    padding: 24px;
+    display: none;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+  }
+  .result-card.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .result-header img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    background: #171512;
+    border-radius: 12px;
+  }
+  .result-title { flex: 1; }
+  .result-id {
+    color: #666;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+  .result-name {
+    font-size: 1.35rem;
+    text-transform: capitalize;
+    color: #fff;
+    margin: 2px 0 6px;
+  }
+  .result-genus {
+    color: #999;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+
+  .type-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .type-badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .flavor-text {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: #ccc;
+    background: #1c1a17;
+    border-left: 3px solid #e6473b;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    margin-bottom: 18px;
+    font-size: 0.82rem;
+  }
+  .info-grid div span {
+    display: block;
+    color: #666;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .info-value { color: #ddd; text-transform: capitalize; }
+
+  .stats-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+  }
+  .stat-name {
+    width: 90px;
+    color: #999;
+    text-transform: capitalize;
+    flex-shrink: 0;
+  }
+  .stat-bar-track {
+    flex: 1;
+    height: 6px;
+    background: #171512;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e6473b, #f0a13a);
+    border-radius: 4px;
+  }
+  .stat-value {
+    width: 30px;
+    text-align: right;
+    color: #ccc;
+  }
+
+  canvas { display: none; }
+</style>
+</head>
+<body>
+
+  <div class="top-nav"><a href="/">← Back to the useless game</a></div>
+
+  <h1>Pokédex Scanner</h1>
+  <p class="subtitle">Snap a photo of a Pokémon plushie, toy, or anything that looks like one — get the full Pokédex entry.</p>
+
+  <div class="scanner">
+    <div class="preview" id="preview">No image yet. Take or choose a photo below.</div>
+
+    <input type="file" id="camera-input" accept="image/*" capture="environment" />
+    <input type="file" id="upload-input" accept="image/*" />
+
+    <div class="btn-row">
+      <button class="btn-secondary" id="camera-btn">📷 Take Photo</button>
+      <button class="btn-secondary" id="upload-btn">🖼️ Choose Image</button>
+    </div>
+
+    <button class="btn-primary" id="identify-btn" disabled>Identify Pokémon</button>
+
+    <div class="status-msg" id="status"></div>
+  </div>
+
+  <div class="result-card" id="result-card">
+    <div class="result-header">
+      <img id="result-sprite" alt="" />
+      <div class="result-title">
+        <div class="result-id" id="result-idnum"></div>
+        <div class="result-name" id="result-name"></div>
+        <div class="result-genus" id="result-genus"></div>
+        <div class="type-badges" id="result-types"></div>
+      </div>
+    </div>
+
+    <div class="flavor-text" id="result-flavor"></div>
+
+    <div class="info-grid" id="result-info"></div>
+
+    <div class="stats-title">Base Stats</div>
+    <div id="result-stats"></div>
+  </div>
+
+  <canvas id="resize-canvas"></canvas>
+
+  <script>
+    const TYPE_COLORS = {
+      normal: '#A8A77A', fire: '#EE8130', water: '#6390F0', electric: '#F7D02C',
+      grass: '#7AC74C', ice: '#96D9D6', fighting: '#C22E28', poison: '#A33EA1',
+      ground: '#E2BF65', flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A',
+      rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC', dark: '#705746',
+      steel: '#B7B7CE', fairy: '#D685AD',
+    };
+
+    const cameraInput = document.getElementById('camera-input');
+    const uploadInput = document.getElementById('upload-input');
+    const cameraBtn = document.getElementById('camera-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const identifyBtn = document.getElementById('identify-btn');
+    const preview = document.getElementById('preview');
+    const statusEl = document.getElementById('status');
+    const resultCard = document.getElementById('result-card');
+    const canvas = document.getElementById('resize-canvas');
+
+    let currentImageDataUrl = null;
+
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+    uploadBtn.addEventListener('click', () => uploadInput.click());
+    cameraInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+    uploadInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+    function handleFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX_DIM = 900;
+          let { width, height } = img;
+          if (width > height && width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          } else if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          currentImageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+          preview.innerHTML = '';
+          const previewImg = document.createElement('img');
+          previewImg.src = currentImageDataUrl;
+          preview.appendChild(previewImg);
+
+          identifyBtn.disabled = false;
+          statusEl.textContent = '';
+          statusEl.className = 'status-msg';
+          resultCard.classList.remove('visible');
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    identifyBtn.addEventListener('click', async () => {
+      if (!currentImageDataUrl) return;
+      identifyBtn.disabled = true;
+      cameraBtn.disabled = true;
+      uploadBtn.disabled = true;
+      statusEl.className = 'status-msg';
+      statusEl.innerHTML = '<span class="spinner"></span>Scanning...';
+      resultCard.classList.remove('visible');
+
+      try {
+        const res = await fetch('/api/identify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: currentImageDataUrl }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = data.error || 'Something went wrong.';
+          statusEl.className = 'status-msg error';
+          return;
+        }
+
+        statusEl.textContent = '';
+        renderResult(data);
+      } catch (err) {
+        statusEl.textContent = 'Network error. Please try again.';
+        statusEl.className = 'status-msg error';
+      } finally {
+        identifyBtn.disabled = false;
+        cameraBtn.disabled = false;
+        uploadBtn.disabled = false;
+      }
+    });
+
+    function renderResult(data) {
+      document.getElementById('result-sprite').src = data.sprite || '';
+      document.getElementById('result-idnum').textContent = '#' + String(data.id).padStart(4, '0');
+      document.getElementById('result-name').textContent = data.name;
+      document.getElementById('result-genus').textContent = data.genus || '';
+
+      const typesEl = document.getElementById('result-types');
+      typesEl.innerHTML = '';
+      data.types.forEach((t) => {
+        const badge = document.createElement('span');
+        badge.className = 'type-badge';
+        badge.textContent = t;
+        badge.style.background = TYPE_COLORS[t] || '#666';
+        typesEl.appendChild(badge);
+      });
+
+      document.getElementById('result-flavor').textContent = data.flavorText || 'No Pokédex description available.';
+
+      const infoEl = document.getElementById('result-info');
+      const heightM = (data.height / 10).toFixed(1);
+      const weightKg = (data.weight / 10).toFixed(1);
+      const abilities = data.abilities.map((a) => a.name.replace(/-/g, ' ') + (a.hidden ? ' (hidden)' : '')).join(', ');
+      infoEl.innerHTML = `
+        <div><span>Height</span><div class="info-value">${heightM} m</div></div>
+        <div><span>Weight</span><div class="info-value">${weightKg} kg</div></div>
+        <div><span>Abilities</span><div class="info-value">${abilities}</div></div>
+        <div><span>Habitat</span><div class="info-value">${data.habitat || 'Unknown'}</div></div>
+        <div><span>Egg Groups</span><div class="info-value">${data.eggGroups.join(', ') || 'Unknown'}</div></div>
+        <div><span>Rarity</span><div class="info-value">${data.isMythical ? 'Mythical' : data.isLegendary ? 'Legendary' : 'Standard'}</div></div>
+      `;
+
+      const statsEl = document.getElementById('result-stats');
+      statsEl.innerHTML = '';
+      data.stats.forEach((s) => {
+        const pct = Math.min(100, Math.round((s.value / 255) * 100));
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        row.innerHTML = `
+          <div class="stat-name">${s.name.replace(/-/g, ' ')}</div>
+          <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%"></div></div>
+          <div class="stat-value">${s.value}</div>
+        `;
+        statsEl.appendChild(row);
+      });
+
+      resultCard.classList.add('visible');
+    }
+  </script>
+</body>
+</html>
